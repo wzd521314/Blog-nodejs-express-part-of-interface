@@ -47,21 +47,22 @@ const newBlog = (blogData = {}) => {
   })
 }
   //更新博客
-const updateBlog = (id, blogData = {}) => {
+const updateBlog = (blogData = {}) => {
    // blogData是一个博客对象。包含title content 属性
    //id 就是要更新的博客的id
-   const title = blogData.title
-   const content = blogData.content
-   const tag = blogData.tag
+   const title = escape(blogData.title)
+   const content = escape(blogData.content)
+   const tag = escape(blogData.tag)
+   const id = blogData.id
 
-   const sql = `update blogs set title='${title}', content='${content}', tag='${tag}' where id=${id}`
+   const sql = `update blogs set title=${title}, content=${content}, tag=${tag} where id=${id}`
 
    return exec(sql).then(updateData => {
      console.log(updateData)
      if (updateData.affectedRows > 0) {
-       return true
+       return new SuccessModel('修改成功')
      }
-     return false
+     return new ErrorModel('修改失败')
    })
 }
 

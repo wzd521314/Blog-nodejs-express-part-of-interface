@@ -45,13 +45,10 @@ router.post('/delete', (req, res, next) => {
 })
 
 //更新博客接口
-router.get('/update', (req, res, next) => {
-  updateBlog(1, {title: 'test', content: '哈哈哈', tag: 'nodejs,js,express'}).then(result => {
-    if(result){
-      res.send('修改成功')
-    }else{
-      res.send('修改失败')
-    }
+router.post('/update', (req, res, next) => {
+  const blogData = req.body
+  updateBlog(blogData).then(result => {
+    res.send(result)
   })
 })
 
