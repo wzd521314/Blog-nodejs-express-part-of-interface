@@ -6,6 +6,7 @@ var {SuccessModel,ErrorModel} = require('../model/resModel')
 
 //获取博客文章主页面接口
 router.post('/blog', (req, res, next) => {
+  console.log(1)
   getList(req.body.pageSize, req.body.targetPage).then(result => {
     res.send(result)
 
