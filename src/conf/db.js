@@ -13,7 +13,7 @@ if (env === 'dev') {
     multipleStatements: true
   },
   REDIS_CONF = {
-    port: 6379,
+    port: 3306,
     host: '127.0.0.1'
   }
 
@@ -28,7 +28,7 @@ if (env === 'production') {
 
   },
   REDIS_CONF = {
-    port: 6379,
+    port: 3306,
     host: '127.0.0.1'
   }
 }

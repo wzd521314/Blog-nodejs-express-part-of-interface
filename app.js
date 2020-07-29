@@ -9,7 +9,7 @@ var usersRouter = require('./src/routes/users');
 var apiRouter = require('./src/routes/api')
 
 var app = express();
-
+global.secret = 'fdfdashjkhu'
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -25,6 +25,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 //设置静态资源的文件路径
 app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
