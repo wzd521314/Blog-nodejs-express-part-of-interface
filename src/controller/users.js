@@ -38,7 +38,7 @@ const checkRegisterInfo = ({nickname, username, password}) => {
 //验证登录信息
 const checkLogin = ({username, password}) => {
   let sql = `SELECT count(1) count from users where user_name = '${username}'`
-  let sql1 = `SELECT user_nickname nickname, user_priority priority from users where user_name = '${username}' and user_password = '${password}'`;
+  let sql1 = `SELECT user_nickname nickname, user_priority priority, user_id userId from users where user_name = '${username}' and user_password = '${password}'`;
 
   return exec(sql).then(result => {
     if(result[0].count === 0) {
@@ -54,8 +54,9 @@ const checkLogin = ({username, password}) => {
           
           const token = jwt.sign({
             nickname: userInfo.nickname,
-            priority: userInfo.priority
-          }, global.secret)
+            priority: userInfo.priority,
+            userId: userInfo.userId
+          }, global.secret , {expiresIn: 60*60*24})
           return new SuccessModel(token)
         }
       })
@@ -65,7 +66,61 @@ const checkLogin = ({username, password}) => {
 }
 
 
+//提交评论信息
+const submitComment = async function (commentData) {
+  let commentDate = commentData.commentDate
+  let articleId = commentData.articleId
+  //这里默认评论都是向我写的文章提交的，于是就是1了哈哈哈
+  let toId = 1
+  let fromId = commentData.answerId
+  let commentContent = commentData.commentContent
+  let sql = `insert into comment_record(pid, articleId, toId, fromId, commentDate, commentContent) value(0, ${articleId}, ${toId}, ${fromId}, '${commentDate}', '${commentContent}');`
+  
+  let res = await exec(sql)
+
+  if(res.affectedRows > 0) {
+    return new SuccessModel('发表评论成功')
+  }
+
+}
+//提交回复信息
+const submitReply = async function (replyData) {
+  let articleId = replyData.articleId
+  let toId = replyData.toId
+  let fromId = replyData.fromId
+  let commentDate = replyData.submitDate
+  let commentContent = replyData.content
+  let pid = replyData.pid
+  let sql = `insert into comment_record(pid, articleId, toId, fromId, commentDate, commentContent) value(${pid}, ${articleId}, ${toId}, ${fromId}, '${commentDate}', '${commentContent}');`
+  let res = await exec(sql)
+  console.log(res);
+  
+  if(res.affectedRows > 0) {
+    return new SuccessModel(res.insertId)
+  }else {
+    return new ErrorModel('发表评论失败')
+  }
+}
+
+
+//获取指定文章的评论信息
+const getComment = async function (articleId) {
+  
+  let id = articleId
+  let sql = `SELECT r.\`id\`, r.\`pid\`, r.\`articleId\`, r.\`toId\`, r.\`fromId\`, r.\`commentDate\`, r.\`commentContent\`, u.\`user_nickname\` toName, f.\`user_nickname\` fromName  FROM myblog.comment_record r INNER JOIN users u ON r.\`toId\` = u.\`user_id\` INNER JOIN users f ON f.\`user_id\` = r.\`fromId\`  where articleId = ${id} order by r.\`pid\` ASC, r.\`commentDate\`  ASC;`
+  
+  let res = await exec(sql)
+  
+  
+  return new SuccessModel(res)
+}
+
+
+
 module.exports = {
   checkRegisterInfo,
-  checkLogin
+  checkLogin,
+  submitComment,
+  getComment,
+  submitReply
 }

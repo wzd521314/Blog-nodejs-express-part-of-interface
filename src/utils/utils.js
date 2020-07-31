@@ -37,13 +37,42 @@ function formatDateTime(inputTime) {
 
  //鉴权中间件函数
 async function authMiddleware  (req ,res, next)  {
-  console.log(req.headers);
   
   const token = String(req.headers.authorization || "").split(" ").pop();
   
-  const tokenInfo = jwt.verify(token, global.secret);
-  req.userInfo = tokenInfo
-  await next()
+  
+
+  if(token) {
+    
+    jwt.verify(token, global.secret, (error, decode) => {
+      
+      if(error) {
+        res.status(401).send({
+          message: '无效的token',
+          errno: 1
+        })
+      }else {
+        req.decode = decode
+        // req.userInfo = {}
+        // req.userInfo.token = jwt.sign({
+        //   nickname: decode.nickname,
+        //   priority: decode.priority,
+        //   userId: decode.userId
+        // }, global.secret, {expiresIn: 60*60*24})
+        // req.userInfo.nickname = decode.nickname
+        // req.userInfo.priority = decode.priority
+        // req.userInfo.userId = decode.userId
+        next()
+      }
+    });
+  }else {
+    res.status(401).send({
+      errno: 1,
+      message: '没有token'
+    })
+  }
+  
+  
  }
 
 
