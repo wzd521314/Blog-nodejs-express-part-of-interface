@@ -79,7 +79,7 @@ const submitComment = async function (commentData) {
   let res = await exec(sql)
 
   if(res.affectedRows > 0) {
-    return new SuccessModel('发表评论成功')
+    return new SuccessModel(res.insertId)
   }
 
 }
@@ -93,7 +93,6 @@ const submitReply = async function (replyData) {
   let pid = replyData.pid
   let sql = `insert into comment_record(pid, articleId, toId, fromId, commentDate, commentContent) value(${pid}, ${articleId}, ${toId}, ${fromId}, '${commentDate}', '${commentContent}');`
   let res = await exec(sql)
-  console.log(res);
   
   if(res.affectedRows > 0) {
     return new SuccessModel(res.insertId)
