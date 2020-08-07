@@ -20,9 +20,9 @@ if (env === 'dev') {
 }
 if (env === 'production') {
   MYSQL_CONF = {
-    host: 'localhost',
+    host: '112.124.21.52',
     user: 'root',
-    password: 'wzd15727657758',
+    password: 'Wzd15727657758',
     database: 'myblog',
     multipleStatements: true
 

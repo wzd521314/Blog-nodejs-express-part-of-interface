@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var {checkRegisterInfo, checkLogin, submitComment, getComment, submitReply} =  require('../controller/users.js')
+var {checkRegisterInfo, checkLogin, submitComment, getComment, getMessage, submitReply, submitMessage, submitMessageReply} =  require('../controller/users.js')
 var {authMiddleware} = require('../utils/utils')
 const jwt = require('jsonwebtoken')
 /* GET users listing. */
@@ -56,6 +56,16 @@ router.post('/submitComment', authMiddleware, function(req, res , next) {
   }
 })
 
+//提交留言接口
+router.post('/submitMessage', authMiddleware, function(req, res , next) {
+  
+  if(req.decode) {
+    submitMessage(req.body.commentData).then(result => {
+      res.send(result)
+    })
+  }
+})
+
 
 //提交回复接口
 router.post('/submitReply', authMiddleware, function(req, res , next) {
@@ -67,11 +77,30 @@ router.post('/submitReply', authMiddleware, function(req, res , next) {
   }
 })
 
+//提交留言回复接口
+router.post('/submitMessageReply', authMiddleware, function(req, res , next) {
+  
+  if(req.decode) {
+    submitMessageReply(req.body.replyData).then(result => {
+      res.send(result)
+    })  
+  }
+})
+
 
 //获取文章评论信息接口
 router.post('/getComment', function(req, res, next) {
 
   getComment(req.body.articleId).then(result => {
+    res.send(result)
+  })
+
+})
+
+//获取博客留言信息接口
+router.post('/getMessage', function(req, res, next) {
+
+  getMessage().then(result => {
     res.send(result)
   })
 

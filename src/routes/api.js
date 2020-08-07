@@ -1,12 +1,14 @@
 var express = require('express')
 var router = express.Router()
-var {getList, getDetail, delBlog, updateBlog, newBlog, getTags, newTag, getTagCount, getLabelBlog, getDateCount, getDateBlog} =require('../controller/blog')
+var {getList, getDetail, delBlog, updateBlog, newBlog, getTags, newTag, getTagCount, getLabelBlog, getDateCount, getDateBlog, newMessage, newComment} =require('../controller/blog')
 var {SuccessModel,ErrorModel} = require('../model/resModel')
 
 
 //获取博客文章主页面接口
 router.post('/blog', (req, res, next) => {
   getList(req.body.pageSize, req.body.targetPage).then(result => {
+    console.log(22);
+    
     res.send(result)
 
   })
@@ -103,6 +105,23 @@ router.post('/dateBlog', (req, res, next) => {
   })
 })
 
+
+//获取最新5条评论
+router.post('/newComment', (req, res, next) => {
+  
+  
+  newComment(req.body).then(result => {
+    res.send(result)
+  })
+})
+//获取最新5条留言
+router.post('/newMessage', (req, res, next) => {
+  
+  
+  newMessage(req.body).then(result => {
+    res.send(result)
+  })
+})
 
 module.exports = router
 

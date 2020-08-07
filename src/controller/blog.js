@@ -9,7 +9,6 @@ const getList = (pageSize, targetPage) => {
   let from = (targetPage - 1)*pageSize
   let to = pageSize
   let sql = `select article_id, user_nickname, article_title, article_content,article_date, label_name FROM blogs b INNER JOIN users u ON b.\`user_id\` = u.\`user_id\` INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` WHERE b.state = 1 order by  article_date desc limit ${from},${to} ; select count(1) AS count from blogs where state=1`
-  console.log(sql)
   //返回 promise
   return exec(sql).then(result => {
     let data = result
@@ -32,19 +31,18 @@ const getDetail = (id) => {
  //新建博客
 const newBlog = (blogData = {}) => {
   // blogData是一个博客对象。包含title content author createtime属性
-  console.log(blogData)
   const title = escape(blogData.title)
   const content = escape(blogData.content)
   //const createtime = Date.now()
   //const tag = escape(blogData.tag)
-  const createtime = escape(formatDateTime(Date.now()))
+  const createtime = escape(formatDate(Date.now()))
   const label_id = escape(blogData.tag)
 
   const sql = `insert into blogs (article_title, article_content, article_date, label_id) values 
               (${title}, ${content}, ${createtime}, ${label_id})`
-  console.log(sql)
+
+             
   return exec(sql).then(insertData => {
-    console.log(insertData)
     return {
       id: insertData.insertId
     }
@@ -54,7 +52,6 @@ const newBlog = (blogData = {}) => {
 const updateBlog = (blogData = {}) => {
    // blogData是一个博客对象。包含title content 属性
    //id 就是要更新的博客的id
-   console.log(blogData)
    const title = escape(blogData.title)
    const content = escape(blogData.content)
    //const tag = escape(blogData.tag)
@@ -94,8 +91,6 @@ const delBlog = (idList) => {
     }else {
       return deleteData.affectedRows > 0? true:false
     }
-
-    
   })
 }
 
@@ -117,7 +112,7 @@ const delBlog = (idList) => {
   const getLabelBlog = ({targetPage, pageSize, labelName}) => {
     let from = (targetPage - 1)*pageSize
     let to = pageSize
-    let sql = `SELECT article_id, article_title, article_date, label_name From blogs  b INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` where label_name = '${labelName}' and state = 1 order by  article_date desc limit ${from},${to};`
+    let sql = `SELECT article_id, article_title, article_date, label_name From blogs  b INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` where label_name = '${labelName}' and state = 1 order by  article_date desc limit ${from},${to}; SElECT count(1) counts from blogs  b INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` where label_name = '${labelName}' and state = 1`
     return exec(sql).then(result => {
       return new SuccessModel(result)
     })
@@ -154,12 +149,37 @@ const delBlog = (idList) => {
 
   //添加分类
   const newTag = (tagName) => {
-    console.log(tagName)
     let sql = `insert into label(label_name) value ('${tagName}')`
     return exec(sql).then(result => {
-      console.log(result)
       return new SuccessModel(result)
     })
+  }
+
+
+  //获取最新5条评论
+  const newComment = (dataInfo) => {
+    let to = dataInfo.size
+    let from = (dataInfo.currentPage - 1)* dataInfo.size
+
+    let sql = `SELECT c.\`id\`, c.\`commentDate\`, c.\`commentContent\`, u.\`user_nickname\` toName, f.\`user_nickname\` fromName, b.\`article_id\`, b.\`article_title\` FROM comment_record c INNER JOIN users u ON c.\`toId\` = u.\`user_id\` INNER JOIN users f ON c.\`fromId\` = f.\`user_id\` INNER JOIN blogs b ON c.\`articleId\` = b.\`article_id\` order by  commentDate desc limit ${from},${to}; SELECT count(1) counts from comment_record;`
+
+    return exec(sql).then(result => {
+      return new SuccessModel(result)
+    })
+
+  }
+
+  //获取最新5条留言
+  const newMessage = (dataInfo) => {
+    let to = dataInfo.size
+    let from = (dataInfo.currentPage - 1)* dataInfo.size
+
+    let sql = `SELECT c.\`id\`, c.\`commentDate\`, c.\`commentContent\`,  f.\`user_nickname\` fromName FROM leave_messages c INNER JOIN users f ON c.\`fromId\` = f.\`user_id\`  order by  commentDate desc limit ${from},${to}; SELECT count(1) counts from leave_messages`
+
+    return exec(sql).then(result => {
+      return new SuccessModel(result)
+    })
+
   }
 
 
@@ -175,5 +195,7 @@ module.exports = {
   getTagCount,
   getLabelBlog,
   getDateCount,
-  getDateBlog
+  getDateBlog,
+  newMessage,
+  newComment
 }

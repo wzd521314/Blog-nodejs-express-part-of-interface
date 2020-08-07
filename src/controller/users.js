@@ -83,6 +83,27 @@ const submitComment = async function (commentData) {
   }
 
 }
+
+//提交一级留言信息
+const submitMessage = async function (commentData) {
+  let commentDate = commentData.commentDate
+  let articleId = 0
+  //这里默认评论都是向我写的文章提交的，于是就是1了哈哈哈
+  let toId = 1
+  let fromId = commentData.answerId
+  let commentContent = commentData.commentContent
+  let sql = `insert into leave_messages(pid, articleId, toId, fromId, commentDate, commentContent) value(0, ${articleId}, ${toId}, ${fromId}, '${commentDate}', '${commentContent}');`
+  
+  let res = await exec(sql)
+
+  if(res.affectedRows > 0) {
+    return new SuccessModel(res.insertId)
+  }
+
+}
+
+
+
 //提交回复信息
 const submitReply = async function (replyData) {
   let articleId = replyData.articleId
@@ -92,6 +113,24 @@ const submitReply = async function (replyData) {
   let commentContent = replyData.content
   let pid = replyData.pid
   let sql = `insert into comment_record(pid, articleId, toId, fromId, commentDate, commentContent) value(${pid}, ${articleId}, ${toId}, ${fromId}, '${commentDate}', '${commentContent}');`
+  let res = await exec(sql)
+  
+  if(res.affectedRows > 0) {
+    return new SuccessModel(res.insertId)
+  }else {
+    return new ErrorModel('发表评论失败')
+  }
+}
+
+//提交留言回复信息
+const submitMessageReply = async function (replyData) {
+  let articleId = 0
+  let toId = replyData.toId
+  let fromId = replyData.fromId
+  let commentDate = replyData.submitDate
+  let commentContent = replyData.content
+  let pid = replyData.pid
+  let sql = `insert into leave_messages(pid, articleId, toId, fromId, commentDate, commentContent) value(${pid}, ${articleId}, ${toId}, ${fromId}, '${commentDate}', '${commentContent}');`
   let res = await exec(sql)
   
   if(res.affectedRows > 0) {
@@ -113,6 +152,16 @@ const getComment = async function (articleId) {
   
   return new SuccessModel(res)
 }
+//获取所有留言信息
+const getMessage = async function () {
+  
+  let sql = `SELECT r.\`id\`, r.\`pid\`, r.\`articleId\`, r.\`toId\`, r.\`fromId\`, r.\`commentDate\`, r.\`commentContent\`, u.\`user_nickname\` toName, f.\`user_nickname\` fromName  FROM myblog.leave_messages r INNER JOIN users u ON r.\`toId\` = u.\`user_id\` INNER JOIN users f ON f.\`user_id\` = r.\`fromId\`   order by r.\`pid\` ASC, r.\`commentDate\`  ASC;`
+  
+  let res = await exec(sql)
+  
+  
+  return new SuccessModel(res)
+}
 
 
 
@@ -121,5 +170,8 @@ module.exports = {
   checkLogin,
   submitComment,
   getComment,
-  submitReply
+  submitReply,
+  getMessage,
+  submitMessage,
+  submitMessageReply
 }
