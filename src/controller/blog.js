@@ -118,6 +118,15 @@ const delBlog = (idList) => {
     })
   }
 
+  //获取分类的个数
+  const getLabelCount = () => {
+    let sql = `select count(1) counts from label `
+
+    return exec(sql).then(result => {
+      return new SuccessModel(result)
+    })
+  }
+
   //获取指定月份的所有博客内容
   const getDateBlog = ({targetPage, pageSize, year, month}) => {
     let from = (targetPage - 1)*pageSize
@@ -197,5 +206,6 @@ module.exports = {
   getDateCount,
   getDateBlog,
   newMessage,
-  newComment
+  newComment,
+  getLabelCount
 }

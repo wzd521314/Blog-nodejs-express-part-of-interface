@@ -1,6 +1,6 @@
 var express = require('express')
 var router = express.Router()
-var {getList, getDetail, delBlog, updateBlog, newBlog, getTags, newTag, getTagCount, getLabelBlog, getDateCount, getDateBlog, newMessage, newComment} =require('../controller/blog')
+var {getList, getDetail, delBlog, updateBlog, newBlog, getTags, newTag, getTagCount, getLabelBlog, getDateCount, getDateBlog, newMessage, newComment, getLabelCount} =require('../controller/blog')
 var {SuccessModel,ErrorModel} = require('../model/resModel')
 
 
@@ -116,9 +116,15 @@ router.post('/newComment', (req, res, next) => {
 })
 //获取最新5条留言
 router.post('/newMessage', (req, res, next) => {
-  
-  
   newMessage(req.body).then(result => {
+    res.send(result)
+  })
+})
+
+
+//获取分类的个数
+router.post('/getLabelCount', (req, res, next) => {
+  getLabelCount().then(result => {
     res.send(result)
   })
 })
