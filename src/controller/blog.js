@@ -8,7 +8,7 @@ var {SuccessModel,ErrorModel} = require('../model/resModel')
 const getList = (pageSize, targetPage) => {
   let from = (targetPage - 1)*pageSize
   let to = pageSize
-  let sql = `select article_id, user_nickname, article_title, article_content,article_date, label_name FROM blogs b INNER JOIN users u ON b.\`user_id\` = u.\`user_id\` INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` WHERE b.state = 1 order by  article_date desc limit ${from},${to} ; select count(1) AS count from blogs where state=1`
+  let sql = `select article_id,article_picture, user_nickname, article_title, article_abstract, article_date, label_name, b.\`label_id\` FROM blogs b INNER JOIN users u ON b.\`user_id\` = u.\`user_id\` INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` WHERE b.state = 1 order by  article_date desc limit ${from},${to} ; select count(1) AS count from blogs where state=1`
   //返回 promise
   return exec(sql).then(result => {
     let data = result
@@ -22,7 +22,7 @@ const getList = (pageSize, targetPage) => {
 
  //获取博客内容详情数据
 const getDetail = (id) => {
-  let sql = `select article_id, user_nickname, article_title, article_content,article_date, label_name FROM blogs b INNER JOIN users u ON b.\`user_id\` = u.\`user_id\` INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` WHERE b.article_id = ${id} `
+  let sql = `select article_id, user_nickname, article_abstract,article_title, article_content,article_date, label_name, b.\`label_id\` FROM blogs b INNER JOIN users u ON b.\`user_id\` = u.\`user_id\` INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` WHERE b.article_id = ${id} `
 
   return exec(sql).then(rows => {
     return new SuccessModel(rows[0])
@@ -37,9 +37,12 @@ const newBlog = (blogData = {}) => {
   //const tag = escape(blogData.tag)
   const createtime = escape(formatDate(Date.now()))
   const label_id = escape(blogData.tag)
+  const abstract = escape(blogData.abstract)
+  const picture = escape(blogData.picture)
+  
 
-  const sql = `insert into blogs (article_title, article_content, article_date, label_id) values 
-              (${title}, ${content}, ${createtime}, ${label_id})`
+  const sql = `insert into blogs (article_title, article_content, article_date, label_id, article_abstract, article_picture) values 
+              (${title}, ${content}, ${createtime}, ${label_id}, ${abstract}, ${picture})`
 
              
   return exec(sql).then(insertData => {
@@ -52,15 +55,17 @@ const newBlog = (blogData = {}) => {
 const updateBlog = (blogData = {}) => {
    // blogData是一个博客对象。包含title content 属性
    //id 就是要更新的博客的id
+   
    const title = escape(blogData.title)
    const content = escape(blogData.content)
+   const abstract = escape(blogData.abstract)
+   const label_id = escape(blogData.label_id)
+
    //const tag = escape(blogData.tag)
    const id = blogData.id
-
-   const sql = `update blogs set article_title=${title}, article_content=${content}, label_id=1 where article_id=${id}`
-   console.log(sql)
+  
+   const sql = `update blogs set article_title=${title}, article_content=${content}, article_abstract = ${abstract} , label_id=${label_id} where article_id=${id}`
    return exec(sql).then(updateData => {
-     console.log(updateData)
      if (updateData.affectedRows > 0) {
        return new SuccessModel('修改成功')
      }
@@ -71,12 +76,10 @@ const updateBlog = (blogData = {}) => {
   //删除博客(修改状态)
 const delBlog = (idList) => {
   //id就是要删除博客的id
-  console.log(idList)
   let sql = ''
   idList.forEach(element => {
     sql += `update blogs set state=0 where article_id=${element}; `
   })
-  console.log(sql)
   return exec(sql).then(deleteData => {
 
     if(deleteData instanceof Array) {
@@ -133,9 +136,6 @@ const delBlog = (idList) => {
     let to = pageSize
     let sql = `SELECT article_id, article_title, article_date, label_name From blogs  b INNER JOIN label l ON b.\`label_id\` = l.\`label_id\` where DATE_FORMAT(article_date,'%Y')=${year}  and DATE_FORMAT(article_date,'%m') = ${month} order by  article_date desc limit ${from},${to};`
     return exec(sql).then(result => {
-      console.log('1');
-      
-      console.log(result)
       return new SuccessModel(result)
     })
   }
